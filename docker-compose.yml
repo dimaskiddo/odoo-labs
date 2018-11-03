@@ -29,8 +29,6 @@ services:
     image: 'dimaskiddo/ubuntu:odoo-10.0'
     networks:
       - odoonet
-    ports:
-      - 8069:8069
     user: root
     environment:
       - ODOO_DB_HOST=postgresql
