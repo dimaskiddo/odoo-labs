@@ -10,7 +10,7 @@ networks:
 
 services:
   postgresql:
-    image: 'dimaskiddo/alpine:postgresql-9.6'
+    image: 'dimaskiddo/debian:postgresql-9.6'
     networks:
       - odoonet
     ports:
@@ -43,7 +43,7 @@ services:
     restart: always
 
   nginx:
-    image: 'dimaskiddo/alpine:nginx-1.12.2-novol'
+    image: 'dimaskiddo/debian:nginx-1.14.2-novol'
     networks:
       - odoonet
     ports:
