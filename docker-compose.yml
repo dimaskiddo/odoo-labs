@@ -25,7 +25,7 @@ services:
     restart: always
 
   odoo:
-    image: 'dimaskiddo/debian:odoo-10.0'
+    image: 'dimaskiddo/debian:odoo-11.0'
     networks:
       - odoonet
     user: root
@@ -36,7 +36,7 @@ services:
       - ODOO_DB_PASSWORD=odoo
     volumes:
       - odoo_data:/var/lib/odoo
-      - ./addons/odoo:/mnt/odoo/addons
+      - ./addons/odoo:/mnt/extra-addons
       - ./configs/odoo/odoo.conf:/etc/odoo/odoo.conf
     depends_on:
       - postgresql
