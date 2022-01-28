@@ -10,7 +10,7 @@ networks:
 
 services:
   postgresql:
-    image: 'dimaskiddo/debian:postgresql-9.6'
+    image: 'dimaskiddo/debian-buster:postgresql-11'
     networks:
       - odoonet
     ports:
