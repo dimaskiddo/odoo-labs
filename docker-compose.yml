@@ -19,11 +19,11 @@ services:
     networks:
       - odoonet
     ports:
-      - 80:8069
+      - 8069:8069
+      - 8072:8072
     env_file: ./env/odoo.env
     volumes:
       - ./data/odoo/data:/var/lib/odoo
-      - ./data/odoo/addons:/mnt/extra-addons
     depends_on:
       - postgresql
     restart: unless-stopped

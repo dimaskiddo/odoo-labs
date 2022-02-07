@@ -1,4 +1,15 @@
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: odoo-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 25Gi
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -7,19 +18,33 @@ spec:
   ports:
     - name: odoo-http
       port: 8069
+    - name: odoo-chat
+      port: 8072
   selector:
     name: odoo
 ---
 kind: Route
 apiVersion: v1
 metadata:
-  name: odoo
+  name: odoo-http
 spec:
   to:
     kind: Service
     name: odoo
   port:
     targetPort: odoo-http
+---
+kind: Route
+apiVersion: v1
+metadata:
+  name: odoo-chat
+spec:
+  path: /longpolling
+  to:
+    kind: Service
+    name: odoo
+  port:
+    targetPort: odoo-chat
 ---
 kind: DeploymentConfig
 apiVersion: v1
@@ -67,7 +92,17 @@ spec:
           ports:
             - containerPort: 8069
               protocol: TCP
+            - containerPort: 8072
+              protocol: TCP
           readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 8069
+            timeoutSeconds: 1
+          livenessProbe:
             failureThreshold: 3
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -80,6 +115,7 @@ spec:
               mountPath: "/var/lib/odoo"
       volumes:
         - name: odoo-data
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: odoo-data
   triggers:
     - type: ConfigChange
