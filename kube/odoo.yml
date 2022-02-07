@@ -1,0 +1,85 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: odoo
+spec:
+  ports:
+    - name: odoo-http
+      port: 8069
+  selector:
+    name: odoo
+---
+kind: Route
+apiVersion: v1
+metadata:
+  name: odoo
+spec:
+  to:
+    kind: Service
+    name: odoo
+  port:
+    targetPort: odoo-http
+---
+kind: DeploymentConfig
+apiVersion: v1
+metadata:
+  name: odoo
+  label:
+    name: odoo
+spec:
+  replicas: 1
+  selector:
+    name: odoo
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: odoo
+    spec:
+      containers:
+        - env:
+          - name: ODOO_DB_HOST
+            value: "postgresql-odoo"
+          - name: ODOO_DB_PORT
+            value: "5432"
+          - name: ODOO_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgresql-odoo-secret
+                key: POSTGRESQL_USER
+          - name: ODOO_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql-odoo-secret
+                key: POSTGRESQL_PASSWORD
+          - name: ODOO_DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: postgresql-odoo-secret
+                key: POSTGRESQL_DATABASE
+          - name: ODOO_DB_SEED
+            value: 'true'
+          name: 'odoo'
+          image: 'dimaskiddo/debian-buster:odoo-15.0'
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8069
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 8069
+            timeoutSeconds: 1
+          volumeMounts:
+            - name: odoo-data
+              mountPath: "/var/lib/odoo"
+      volumes:
+        - name: odoo-data
+          emptyDir: {}
+  triggers:
+    - type: ConfigChange
